@@ -143,28 +143,33 @@ function App() {
 
   return (
     <div className="bg-black text-white min-h-screen flex flex-col p-6 font-sans">
-      <header className="sticky top-0 bg-black bg-opacity-90 backdrop-blur-md flex items-center p-4 rounded-b-xl z-20 mb-6">
-        <motion.img
-          src={logo}
-          alt="Logo"
-          className="mr-4 rounded"
-          animate={{
-            width: scrolled ? 75 : 170,
-            height: scrolled ? 75 : 170,
-          }}
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        />
-        <h1 className="text-xl font-bold select-none lg:text-2xl">
-          Joe Rogan Experience
-        </h1>
-        <input
-          type="search"
-          placeholder="Search episodes..."
-          className="ml-auto px-3 py-2 rounded-2xl bg-zinc-900 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 transition w-64"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          aria-label="Search episodes"
-        />
+      <header className="sticky top-0 bg-black bg-opacity-90 backdrop-blur-md p-4 rounded-b-xl z-20 mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center">
+            <motion.img
+              src={logo}
+              alt="Logo"
+              className="rounded mr-4"
+              animate={{
+                width: scrolled ? 75 : 170,
+                height: scrolled ? 75 : 170,
+              }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            />
+            <h1 className="text-xl font-bold select-none lg:text-2xl">
+              Joe Rogan Experience
+            </h1>
+          </div>
+
+          <input
+            type="search"
+            placeholder="Search episodes..."
+            className="px-4 py-2 rounded-2xl bg-zinc-900 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 transition w-full sm:w-64"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            aria-label="Search episodes"
+          />
+        </div>
       </header>
 
       {loading && <p className="text-zinc-400">Loading episodes...</p>}
