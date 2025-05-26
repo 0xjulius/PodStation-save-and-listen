@@ -2,45 +2,46 @@ import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "./assets/logo.png";
 
-const FEED_URL = "https://feeds.megaphone.fm/GLT1412515089";
-const proxyUrl = "https://api.allorigins.win/get?url=";
+const FEED_URL = "/api/feed"; // Your existing podcast feed API
+const YOUTUBE_FEED_URL = "/api/youtube"; // New YouTube feed API
 
 function App() {
   const [episodes, setEpisodes] = useState([]);
+  const [youtubeEpisodes, setYoutubeEpisodes] = useState([]);
   const [visibleCount, setVisibleCount] = useState(9);
   const [loading, setLoading] = useState(true);
+  const [ytLoading, setYtLoading] = useState(false);
   const [error, setError] = useState("");
+  const [ytError, setYtError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [expandedEpisodes, setExpandedEpisodes] = useState(new Set());
   const [scrolled, setScrolled] = useState(false);
   const [retryAfter, setRetryAfter] = useState(0);
+  const [showYoutube, setShowYoutube] = useState(false); // toggle feed
 
+  // Fetch podcast feed
   useEffect(() => {
     let timerId;
 
     const fetchFeed = async () => {
+      setLoading(true);
       try {
-        const response = await fetch("/api/feed");
-
+        const response = await fetch(FEED_URL);
         if (response.status === 429) {
-          // Handle rate limit: start countdown from 60 seconds
           setError("Too many requests. Please try again later.");
           setRetryAfter(60);
-
           timerId = setInterval(() => {
             setRetryAfter((prev) => {
               if (prev <= 1) {
                 clearInterval(timerId);
-                setError(""); // clear error so user can retry
+                setError("");
                 return 0;
               }
               return prev - 1;
             });
           }, 1000);
-
-          return; // stop fetching further
+          return;
         }
-
         if (!response.ok) {
           let message = "Failed to load podcast feed.";
           try {
@@ -49,11 +50,9 @@ function App() {
           } catch (_) {}
           throw new Error(message);
         }
-
         const text = await response.text();
         const parser = new DOMParser();
         const xml = parser.parseFromString(text, "application/xml");
-
         const items = Array.from(xml.querySelectorAll("item"));
         const parsedEpisodes = items.map((item) => {
           const get = (selector) =>
@@ -65,22 +64,14 @@ function App() {
             const itunesNS = "http://www.itunes.com/dtds/podcast-1.0.dtd";
             const mediaNS = "http://search.yahoo.com/mrss/";
 
-            const itunesImage = item.getElementsByTagNameNS(
-              itunesNS,
-              "image"
-            )[0];
+            const itunesImage = item.getElementsByTagNameNS(itunesNS, "image")[0];
             if (itunesImage && itunesImage.getAttribute("href")) {
               return itunesImage.getAttribute("href");
             }
-
-            const mediaContent = item.getElementsByTagNameNS(
-              mediaNS,
-              "content"
-            )[0];
+            const mediaContent = item.getElementsByTagNameNS(mediaNS, "content")[0];
             if (mediaContent && mediaContent.getAttribute("url")) {
               return mediaContent.getAttribute("url");
             }
-
             return "https://via.placeholder.com/300x300?text=No+Image";
           };
 
@@ -102,7 +93,7 @@ function App() {
         setError("");
       } catch (err) {
         console.error("Error loading feed:", err);
-        setError(err.message); // This now reflects "Too many requests" if applicable
+        setError(err.message);
       } finally {
         setLoading(false);
       }
@@ -115,6 +106,53 @@ function App() {
     };
   }, []);
 
+  // Fetch YouTube feed
+  useEffect(() => {
+    if (!showYoutube) return; // only fetch when toggled on
+    setYtLoading(true);
+    setYtError("");
+    (async () => {
+      try {
+        const response = await fetch(YOUTUBE_FEED_URL);
+        if (!response.ok) throw new Error("Failed to load YouTube feed");
+        const text = await response.text();
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(text, "application/xml");
+        const entries = Array.from(xml.querySelectorAll("entry"));
+
+        const ytEpisodes = entries.map((entry) => {
+          const get = (selector) =>
+            entry.querySelector(selector)?.textContent || "";
+          const getAttr = (selector, attr) =>
+            entry.querySelector(selector)?.getAttribute(attr) || "";
+
+          const mediaNS = "http://search.yahoo.com/mrss/";
+          const mediaThumbnail = entry.getElementsByTagNameNS(mediaNS, "thumbnail")[0];
+          const thumbnailUrl = mediaThumbnail?.getAttribute("url") || "https://via.placeholder.com/300x300?text=No+Image";
+
+          return {
+            title: get("title"),
+            description: get("media:group media:description") || get("media:description") || "",
+            pubDate: new Date(get("published")).toLocaleDateString(undefined, {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            }),
+            duration: "", // Not provided in standard YouTube feed XML
+            audioUrl: getAttr("link[rel='alternate']", "href") || getAttr("link", "href"), // fallback to video URL
+            image: thumbnailUrl,
+          };
+        });
+        setYoutubeEpisodes(ytEpisodes);
+      } catch (err) {
+        console.error("Error loading YouTube feed:", err);
+        setYtError(err.message);
+      } finally {
+        setYtLoading(false);
+      }
+    })();
+  }, [showYoutube]);
+
   useEffect(() => {
     const onScroll = () => {
       setScrolled(window.scrollY > 50);
@@ -123,14 +161,16 @@ function App() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const filteredEpisodes = useMemo(() => {
-    if (!searchTerm.trim()) return episodes;
-    return episodes.filter((ep) =>
+  // Decide which episodes to show based on toggle
+  const episodesToShow = useMemo(() => {
+    const list = showYoutube ? youtubeEpisodes : episodes;
+    if (!searchTerm.trim()) return list;
+    return list.filter((ep) =>
       ep.title.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [searchTerm, episodes]);
+  }, [searchTerm, episodes, youtubeEpisodes, showYoutube]);
 
-  const visibleEpisodes = filteredEpisodes.slice(0, visibleCount);
+  const visibleEpisodes = episodesToShow.slice(0, visibleCount);
 
   const toggleDescription = (index) => {
     setExpandedEpisodes((prev) => {
@@ -161,19 +201,39 @@ function App() {
             </h1>
           </div>
 
-          <input
-            type="search"
-            placeholder="Search episodes..."
-            className="px-4 py-2 rounded-2xl bg-zinc-900 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 transition w-full sm:w-64"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            aria-label="Search episodes"
-          />
+          <div className="flex gap-4 items-center">
+            <input
+              type="search"
+              placeholder="Search episodes..."
+              className="px-4 py-2 rounded-2xl bg-zinc-900 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 transition w-full sm:w-64"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              aria-label="Search episodes"
+            />
+
+            <button
+              className={`px-4 py-2 rounded-2xl font-semibold ${
+                showYoutube ? "bg-orange-600" : "bg-zinc-900 hover:bg-zinc-800"
+              }`}
+              onClick={() => setShowYoutube((v) => !v)}
+              aria-pressed={showYoutube}
+            >
+              {showYoutube ? "Show Podcast" : "Show YouTube"}
+            </button>
+          </div>
         </div>
       </header>
 
-      {loading && <p className="text-zinc-400">Loading episodes...</p>}
-      {error && <p className="text-red-500">{error}</p>}
+      {/* Loading and error messages */}
+      {loading && !showYoutube && (
+        <p className="text-zinc-400">Loading episodes...</p>
+      )}
+      {ytLoading && showYoutube && (
+        <p className="text-zinc-400">Loading YouTube videos...</p>
+      )}
+
+      {error && !showYoutube && <p className="text-red-500">{error}</p>}
+      {ytError && showYoutube && <p className="text-red-500">{ytError}</p>}
 
       {retryAfter > 0 && (
         <p className="text-yellow-400 mb-4">
@@ -182,8 +242,12 @@ function App() {
         </p>
       )}
 
-      {!loading && filteredEpisodes.length === 0 && (
+      {!loading && !showYoutube && episodesToShow.length === 0 && (
         <p className="text-zinc-400">No episodes found for your search.</p>
+      )}
+
+      {!ytLoading && showYoutube && episodesToShow.length === 0 && (
+        <p className="text-zinc-400">No videos found for your search.</p>
       )}
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 flex-grow">
@@ -206,8 +270,11 @@ function App() {
               />
               <h2 className="text-xl font-semibold mb-1">{ep.title}</h2>
               <p className="text-sm text-zinc-400 mb-2">{ep.pubDate}</p>
-              <audio controls src={ep.audioUrl} className="w-full mb-2" />
-              <p className="text-xs text-zinc-500 mb-2"></p>
+
+              {/* If it's podcast episode, show audio player */}
+              {!showYoutube && ep.audioUrl && (
+                <audio controls src={ep.audioUrl} className="w-full mb-2" />
+              )}
 
               {ep.description && (
                 <>
@@ -233,13 +300,15 @@ function App() {
                         <div
                           dangerouslySetInnerHTML={{ __html: ep.description }}
                         />
-                        <p className="text-xs text-orange-600 italic">
-                          Disclaimer: I do not own, control, or profit from any
-                          referral or affiliate links that may appear in episode
-                          descriptions. These links are part of the original
-                          third-party podcast feed and are displayed
-                          automatically without modification.
-                        </p>
+                        {!showYoutube && (
+                          <p className="text-xs text-orange-600 italic">
+                            Disclaimer: I do not own, control, or profit from
+                            any referral or affiliate links that may appear in
+                            episode descriptions. These links are part of the
+                            original third-party podcast feed and are displayed
+                            automatically without modification.
+                          </p>
+                        )}
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -250,7 +319,7 @@ function App() {
         </AnimatePresence>
       </div>
 
-      {visibleCount < filteredEpisodes.length && (
+      {visibleCount < episodesToShow.length && (
         <div className="flex justify-center mt-8">
           <button
             onClick={() => setVisibleCount((c) => c + 9)}
@@ -261,6 +330,8 @@ function App() {
           </button>
         </div>
       )}
+
+      {/* footer unchanged */}
 
       <footer className="mt-12 py-6 border-t border-gray-700 text-center text-zinc-400 text-sm select-none">
         <p className="mt-2">
@@ -327,5 +398,6 @@ function App() {
     </div>
   );
 }
+
 
 export default App;
