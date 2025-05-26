@@ -3,3 +3,11 @@ body {
   font-family: 'Poppins', sans-serif;
   background-color: black;
 }
+
+.title-gradient {
+background-image: linear-gradient(to right top, #eb965e, #c27456, #96554a, #693b3a, #3d2427, #371e22, #30181c, #2a1217, #44181f, #601d25, #7c2328, #972b28);background-image: linear-gradient(to left top, #eb965e, #dc8252, #cd6e47, #bd5b3c, #ad4733, #9a3930, #862d2c, #722127, #561b23, #3b161d, #210f13, #000000);background-image: linear-gradient(to bottom, #eb965e, #dc8252, #cd6e47, #bd5b3c, #ad4733, #9a3930, #862d2c, #722127, #561b23, #3b161d, #210f13, #000000);background-image: linear-gradient(to top, #eb965e, #dc8252, #cd6e47, #bd5b3c, #ad4733, #9a3930, #862d2c, #722127, #561b23, #3b161d, #210f13, #000000);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+text-fill-color: transparent;
+}

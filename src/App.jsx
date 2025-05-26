@@ -183,8 +183,8 @@ function App() {
               }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
             />
-            <h1 className="text-xl font-bold select-none lg:text-2xl">
-              Joe Rogan Experience
+            <h1 className="text-xl font-bold select-none lg:text-3xl title-gradient">
+              THE JOE ROGAN EXPERIENCE.
             </h1>
           </div>
 
