@@ -64,11 +64,17 @@ function App() {
             const itunesNS = "http://www.itunes.com/dtds/podcast-1.0.dtd";
             const mediaNS = "http://search.yahoo.com/mrss/";
 
-            const itunesImage = item.getElementsByTagNameNS(itunesNS, "image")[0];
+            const itunesImage = item.getElementsByTagNameNS(
+              itunesNS,
+              "image"
+            )[0];
             if (itunesImage && itunesImage.getAttribute("href")) {
               return itunesImage.getAttribute("href");
             }
-            const mediaContent = item.getElementsByTagNameNS(mediaNS, "content")[0];
+            const mediaContent = item.getElementsByTagNameNS(
+              mediaNS,
+              "content"
+            )[0];
             if (mediaContent && mediaContent.getAttribute("url")) {
               return mediaContent.getAttribute("url");
             }
@@ -127,20 +133,39 @@ function App() {
             entry.querySelector(selector)?.getAttribute(attr) || "";
 
           const mediaNS = "http://search.yahoo.com/mrss/";
-          const mediaThumbnail = entry.getElementsByTagNameNS(mediaNS, "thumbnail")[0];
-          const thumbnailUrl = mediaThumbnail?.getAttribute("url") || "https://via.placeholder.com/300x300?text=No+Image";
+          const mediaThumbnail = entry.getElementsByTagNameNS(
+            mediaNS,
+            "thumbnail"
+          )[0];
+          const thumbnailUrl =
+            mediaThumbnail?.getAttribute("url") ||
+            "https://via.placeholder.com/300x300?text=No+Image";
+
+          // Extract YouTube video ID from the link URL
+          // Typical YouTube URL format: https://www.youtube.com/watch?v=VIDEO_ID
+          let videoId = "";
+          const linkUrl =
+            getAttr("link[rel='alternate']", "href") ||
+            getAttr("link", "href") ||
+            "";
+          const urlParams = new URLSearchParams(linkUrl.split("?")[1]);
+          videoId = urlParams.get("v") || "";
 
           return {
             title: get("title"),
-            description: get("media:group media:description") || get("media:description") || "",
+            description:
+              get("media:group media:description") ||
+              get("media:description") ||
+              "",
             pubDate: new Date(get("published")).toLocaleDateString(undefined, {
               year: "numeric",
               month: "short",
               day: "numeric",
             }),
             duration: "", // Not provided in standard YouTube feed XML
-            audioUrl: getAttr("link[rel='alternate']", "href") || getAttr("link", "href"), // fallback to video URL
+            audioUrl: linkUrl, // fallback to video URL
             image: thumbnailUrl,
+            videoId, // for embedding
           };
         });
         setYoutubeEpisodes(ytEpisodes);
@@ -262,12 +287,28 @@ function App() {
               transition={{ duration: 0.3 }}
               className="bg-zinc-900 p-4 rounded-2xl shadow-lg flex flex-col"
             >
-              <img
-                src={ep.image}
-                alt={ep.title}
-                className="rounded-xl mb-4 w-full aspect-square object-cover"
-                loading="lazy"
-              />
+              {/* If YouTube feed, embed video */}
+              {showYoutube && ep.videoId ? (
+                <div className="mb-4 aspect-video rounded-xl overflow-hidden">
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    src={`https://www.youtube.com/embed/${ep.videoId}`}
+                    title={ep.title}
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              ) : (
+                <img
+                  src={ep.image}
+                  alt={ep.title}
+                  className="rounded-xl mb-4 w-full aspect-square object-cover"
+                  loading="lazy"
+                />
+              )}
+
               <h2 className="text-xl font-semibold mb-1">{ep.title}</h2>
               <p className="text-sm text-zinc-400 mb-2">{ep.pubDate}</p>
 
@@ -398,6 +439,5 @@ function App() {
     </div>
   );
 }
-
 
 export default App;
