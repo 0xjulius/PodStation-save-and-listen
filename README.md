@@ -1,12 +1,25 @@
-# React + Vite
+# WEBSITE LIVE: [JRE-POD-BROWSER](https://jre-0xjulius.vercel.app/)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# 🎙️ Joe Rogan Experience Podcast Browser (Unofficial)
+A fully serverless, responsive web app built with React, Tailwind CSS, and Vite that lets users search, stream, and explore episodes from the official Joe Rogan Experience RSS feed.
 
-Currently, two official plugins are available:
+This project uses a serverless function (API route) to proxy and parse XML podcast data, avoiding CORS issues without needing a dedicated backend. All episode data is fetched on-demand at runtime
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## Expanding the ESLint configuration
+![screenshot](src/assets/ss.png)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+🔍 Live search, lazy loading, animated UI with Framer Motion
+
+🧰 Tech Stack:
+⚛️ React + Tailwind CSS for the frontend UI
+
+🔁 fetch + DOMParser to parse RSS feed data
+
+🌐 Serverless API route (e.g., Vercel, Netlify Functions) for CORS-safe RSS fetching
+
+🎧 Built-in HTML5 audio player
+
+
+
+# Amazing responsivity for mobile devices!
+![screenshot](src/assets/mobile.png)
