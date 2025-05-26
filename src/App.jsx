@@ -2,8 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "./assets/logo.png";
 
-const FEED_URL = "https://feeds.megaphone.fm/GLT1412515089";
-const CORS_PROXY = "https://thingproxy.freeboard.io/fetch/";
+const FEED_URL = "/api/feed";
 
 function App() {
   const [episodes, setEpisodes] = useState([]);
@@ -17,7 +16,7 @@ function App() {
   useEffect(() => {
     const fetchFeed = async () => {
       try {
-        const response = await fetch(`${CORS_PROXY}${FEED_URL}`);
+        const response = await fetch(FEED_URL);
         if (!response.ok) throw new Error("Failed to fetch feed");
 
         const text = await response.text();
