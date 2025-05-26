@@ -2,7 +2,8 @@ import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "./assets/logo.png";
 
-const FEED_URL = "/api/feed";
+const FEED_URL = "https://feeds.megaphone.fm/GLT1412515089";
+const proxyUrl = "https://api.allorigins.win/get?url=";
 
 function App() {
   const [episodes, setEpisodes] = useState([]);
@@ -16,10 +17,11 @@ function App() {
   useEffect(() => {
     const fetchFeed = async () => {
       try {
-        const response = await fetch(FEED_URL);
+        const response = await fetch("/api/feed");
         if (!response.ok) throw new Error("Failed to fetch feed");
 
-        const text = await response.text();
+        const text = await response.text(); 
+
         const parser = new DOMParser();
         const xml = parser.parseFromString(text, "application/xml");
 
@@ -252,6 +254,7 @@ function App() {
           appear in this site. These links are part of the original third-party
           podcast feed and are included automatically for educational purposes
           only.
+          </p>
           <p className="mt-4 text-xs text-zinc-400">
             This website is not affiliated with or endorsed by the
             Joe Rogan Experience, Megaphone, or any related entities.
@@ -260,7 +263,6 @@ function App() {
             property of their respective owners and shown here for educational,
             non-commercial purposes only.
           </p>
-        </p>
       </footer>
     </div>
   );
