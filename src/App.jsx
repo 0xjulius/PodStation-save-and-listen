@@ -254,8 +254,7 @@ function App() {
           podcast feed and are included automatically for educational purposes
           only.
           <p className="mt-4 text-xs text-zinc-400">
-            This website is a personal learning project exploring web
-            development with React. It is not affiliated with or endorsed by the
+            This website is not affiliated with or endorsed by the
             Joe Rogan Experience, Megaphone, or any related entities.
             <br />
             All podcast content, including descriptions and media, is the
