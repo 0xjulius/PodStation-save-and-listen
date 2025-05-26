@@ -206,7 +206,13 @@ function App() {
               />
               <h2 className="text-xl font-semibold mb-1">{ep.title}</h2>
               <p className="text-sm text-zinc-400 mb-2">{ep.pubDate}</p>
-              <audio controls src={ep.audioUrl} className="w-full mb-2" />
+              <audio
+                controls
+                controlsList="nodownload"
+                src={ep.audioUrl}
+                className="w-full mb-2"
+              />
+
               <p className="text-xs text-zinc-500 mb-2"></p>
 
               {ep.description && (
