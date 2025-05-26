@@ -14,6 +14,7 @@ function App() {
   const [expandedEpisodes, setExpandedEpisodes] = useState(new Set());
   const [scrolled, setScrolled] = useState(false);
   const [retryAfter, setRetryAfter] = useState(0);
+  const [currentPlayingIndex, setCurrentPlayingIndex] = useState(null);
 
   useEffect(() => {
     let timerId;
@@ -23,7 +24,6 @@ function App() {
         const response = await fetch("/api/feed");
 
         if (response.status === 429) {
-          // Handle rate limit: start countdown from 60 seconds
           setError("Too many requests. Please try again later.");
           setRetryAfter(60);
 
@@ -31,14 +31,14 @@ function App() {
             setRetryAfter((prev) => {
               if (prev <= 1) {
                 clearInterval(timerId);
-                setError(""); // clear error so user can retry
+                setError("");
                 return 0;
               }
               return prev - 1;
             });
           }, 1000);
 
-          return; // stop fetching further
+          return;
         }
 
         if (!response.ok) {
@@ -102,7 +102,7 @@ function App() {
         setError("");
       } catch (err) {
         console.error("Error loading feed:", err);
-        setError(err.message); // This now reflects "Too many requests" if applicable
+        setError(err.message);
       } finally {
         setLoading(false);
       }
@@ -140,6 +140,33 @@ function App() {
       return newSet;
     });
   };
+
+  // Media Session API effect
+  useEffect(() => {
+    if (currentPlayingIndex === null) return;
+    const ep = visibleEpisodes[currentPlayingIndex];
+    if (!ep) return;
+
+    if ("mediaSession" in navigator) {
+      navigator.mediaSession.metadata = new window.MediaMetadata({
+        title: ep.title,
+        artist: "Joe Rogan Experience",
+        album: `Episode ${currentPlayingIndex + 1}`,
+        artwork: [{ src: ep.image, sizes: "512x512", type: "image/png" }],
+      });
+
+      navigator.mediaSession.setActionHandler("play", () => {
+        const audioElems = document.querySelectorAll("audio");
+        if (audioElems[currentPlayingIndex])
+          audioElems[currentPlayingIndex].play();
+      });
+      navigator.mediaSession.setActionHandler("pause", () => {
+        const audioElems = document.querySelectorAll("audio");
+        if (audioElems[currentPlayingIndex])
+          audioElems[currentPlayingIndex].pause();
+      });
+    }
+  }, [currentPlayingIndex, visibleEpisodes]);
 
   return (
     <div className="bg-black text-white min-h-screen flex flex-col p-6 font-sans">
@@ -211,6 +238,7 @@ function App() {
                 controlsList="nodownload"
                 src={ep.audioUrl}
                 className="w-full mb-2"
+                onPlay={() => setCurrentPlayingIndex(index)}
               />
 
               <p className="text-xs text-zinc-500 mb-2"></p>
