@@ -13,20 +13,48 @@ function App() {
   const [searchTerm, setSearchTerm] = useState("");
   const [expandedEpisodes, setExpandedEpisodes] = useState(new Set());
   const [scrolled, setScrolled] = useState(false);
+  const [retryAfter, setRetryAfter] = useState(0);
 
   useEffect(() => {
+    let timerId;
+
     const fetchFeed = async () => {
       try {
         const response = await fetch("/api/feed");
-        if (!response.ok) throw new Error("Failed to fetch feed");
 
-        const text = await response.text(); 
+        if (response.status === 429) {
+          // Handle rate limit: start countdown from 60 seconds
+          setError("Too many requests. Please try again later.");
+          setRetryAfter(60);
 
+          timerId = setInterval(() => {
+            setRetryAfter((prev) => {
+              if (prev <= 1) {
+                clearInterval(timerId);
+                setError(""); // clear error so user can retry
+                return 0;
+              }
+              return prev - 1;
+            });
+          }, 1000);
+
+          return; // stop fetching further
+        }
+
+        if (!response.ok) {
+          let message = "Failed to load podcast feed.";
+          try {
+            const errorData = await response.json();
+            if (errorData?.error) message = errorData.error;
+          } catch (_) {}
+          throw new Error(message);
+        }
+
+        const text = await response.text();
         const parser = new DOMParser();
         const xml = parser.parseFromString(text, "application/xml");
 
         const items = Array.from(xml.querySelectorAll("item"));
-
         const parsedEpisodes = items.map((item) => {
           const get = (selector) =>
             item.querySelector(selector)?.textContent || "";
@@ -71,15 +99,20 @@ function App() {
         });
 
         setEpisodes(parsedEpisodes);
+        setError("");
       } catch (err) {
         console.error("Error loading feed:", err);
-        setError("Failed to load podcast feed.");
+        setError(err.message); // This now reflects "Too many requests" if applicable
       } finally {
         setLoading(false);
       }
     };
 
     fetchFeed();
+
+    return () => {
+      if (timerId) clearInterval(timerId);
+    };
   }, []);
 
   useEffect(() => {
@@ -136,6 +169,13 @@ function App() {
 
       {loading && <p className="text-zinc-400">Loading episodes...</p>}
       {error && <p className="text-red-500">{error}</p>}
+
+      {retryAfter > 0 && (
+        <p className="text-yellow-400 mb-4">
+          Please wait {retryAfter} second{retryAfter !== 1 ? "s" : ""} before
+          retrying.
+        </p>
+      )}
 
       {!loading && filteredEpisodes.length === 0 && (
         <p className="text-zinc-400">No episodes found for your search.</p>
@@ -210,6 +250,7 @@ function App() {
           <button
             onClick={() => setVisibleCount((c) => c + 9)}
             className="px-8 py-3 bg-orange-600 rounded-full font-semibold text-white transition-colors focus:outline-none focus:ring-2 focus:ring-orange-400"
+            disabled={retryAfter > 0}
           >
             Load More
           </button>
@@ -254,15 +295,15 @@ function App() {
           appear in this site. These links are part of the original third-party
           podcast feed and are included automatically for educational purposes
           only.
-          </p>
-          <p className="mt-4 text-xs text-zinc-400">
-            This website is not affiliated with or endorsed by the
-            Joe Rogan Experience, Megaphone, or any related entities.
-            <br />
-            All podcast content, including descriptions and media, is the
-            property of their respective owners and shown here for educational,
-            non-commercial purposes only.
-          </p>
+        </p>
+        <p className="mt-4 text-xs text-zinc-400">
+          This website is not affiliated with or endorsed by the Joe Rogan
+          Experience, Megaphone, or any related entities.
+          <br />
+          All podcast content, including descriptions and media, is the property
+          of their respective owners and shown here for educational,
+          non-commercial purposes only.
+        </p>
       </footer>
     </div>
   );
