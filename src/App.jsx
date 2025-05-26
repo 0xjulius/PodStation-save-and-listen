@@ -272,21 +272,33 @@ function App() {
         </p>
         <p className="mt-2">
           <a
-            href="https://twitter.com/joerogan"
-            target="_blank"
-            rel="noreferrer"
-            className="mx-2 hover:text-orange-400"
-          >
-            Twitter
-          </a>{" "}
-          |{" "}
-          <a
             href="https://www.joerogan.com/"
             target="_blank"
             rel="noreferrer"
             className="mx-2 hover:text-orange-400"
+            aria-label="Official JRE Site"
           >
             Official Site
+          </a>{" "}
+          |{" "}
+          <a
+            href="https://juliusaalto.com"
+            target="_blank"
+            rel="noreferrer"
+            className="mx-2 hover:text-orange-400"
+            aria-label="My Website"
+          >
+            My Website
+          </a>{" "}
+          |{" "}
+          <a
+            href="https://github.com/0xjulius"
+            target="_blank"
+            rel="noreferrer"
+            className="mx-2 hover:text-orange-400"
+            aria-label="GitHub"
+          >
+            GitHub
           </a>
         </p>
         <p className="mt-2 text-xs text-orange-400">
