@@ -264,13 +264,6 @@ function App() {
 
       <footer className="mt-12 py-6 border-t border-gray-700 text-center text-zinc-400 text-sm select-none">
         <p className="mt-2">
-          <p className="mb-8 text-xs text-orange-400">
-            <strong className="text-zinc-400">Disclaimer:</strong> I do not own,
-            control, or profit from any referral or affiliate links that may
-            appear in this site. These links are part of the original
-            third-party podcast feed and are included automatically for
-            educational purposes only.
-          </p>
           <a
             href="https://www.joerogan.com/"
             target="_blank"
@@ -312,6 +305,13 @@ function App() {
         </p>
         <p>
           <br />
+          <p className="mb-8 text-xs text-orange-400">
+            <strong className="text-zinc-400">Disclaimer:</strong> I do not own,
+            control, or profit from any referral or affiliate links that may
+            appear in this site. These links are part of the original
+            third-party podcast feed and are included automatically for
+            educational purposes only.
+          </p>
           Podcast data from{" "}
           <a
             href="https://megaphone.fm/"
