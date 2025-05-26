@@ -254,7 +254,7 @@ function App() {
         <div className="flex justify-center mt-8">
           <button
             onClick={() => setVisibleCount((c) => c + 9)}
-            className="px-8 py-3 bg-orange-600 rounded-full font-semibold text-white transition-colors focus:outline-none focus:ring-2 focus:ring-orange-400"
+            className="cursor-pointer px-8 py-3 bg-orange-600 rounded-full font-semibold text-white transition-colors focus:outline-none focus:ring-2 focus:ring-orange-400"
             disabled={retryAfter > 0}
           >
             Load More
