@@ -2,31 +2,33 @@ import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "./assets/logo.png";
 
-const FEED_URL = "https://feeds.megaphone.fm/GLT1412515089";
-const proxyUrl = "https://api.allorigins.win/get?url=";
 
 function App() {
-  const [episodes, setEpisodes] = useState([]);
-  const [visibleCount, setVisibleCount] = useState(9);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [expandedEpisodes, setExpandedEpisodes] = useState(new Set());
-  const [scrolled, setScrolled] = useState(false);
-  const [retryAfter, setRetryAfter] = useState(0);
-  const [currentPlayingIndex, setCurrentPlayingIndex] = useState(null);
+  // alustetaan useState-hookeilla kaikki tarvittavat tilamuuttujat
+  const [episodes, setEpisodes] = useState([]); // kaikki jaksot
+  const [visibleCount, setVisibleCount] = useState(9); // näkyvien jaksojen määrä
+  const [loading, setLoading] = useState(true); // lataustila
+  const [error, setError] = useState(""); // mahdollinen virheteksti
+  const [searchTerm, setSearchTerm] = useState(""); // hakukentän arvo
+  const [expandedEpisodes, setExpandedEpisodes] = useState(new Set()); // mitkä jaksot ovat auki
+  const [scrolled, setScrolled] = useState(false); // onko sivua vieritetty
+  const [retryAfter, setRetryAfter] = useState(0); // odotusaika jos tulee liikaa pyyntöjä
+  const [currentPlayingIndex, setCurrentPlayingIndex] = useState(null); // mikä jakso on käynnissä
 
   useEffect(() => {
     let timerId;
 
+    // haetaan podcast-feedi palvelimelta
     const fetchFeed = async () => {
       try {
         const response = await fetch("/api/feed");
 
+        // jos pyyntöjä on liikaa, asetetaan virhe ja odotusaika
         if (response.status === 429) {
           setError("Too many requests. Please try again later.");
           setRetryAfter(60);
 
+          // käynnistetään sekuntikello joka laskee odotusaikaa
           timerId = setInterval(() => {
             setRetryAfter((prev) => {
               if (prev <= 1) {
@@ -41,6 +43,7 @@ function App() {
           return;
         }
 
+        // jos vastaus ei ole ok, yritetään hakea virheviesti
         if (!response.ok) {
           let message = "Failed to load podcast feed.";
           try {
@@ -50,17 +53,21 @@ function App() {
           throw new Error(message);
         }
 
+        // parsitaan xml-feed
         const text = await response.text();
         const parser = new DOMParser();
         const xml = parser.parseFromString(text, "application/xml");
 
         const items = Array.from(xml.querySelectorAll("item"));
+
+        // muunnetaan xml-jaksot json-muotoon
         const parsedEpisodes = items.map((item) => {
           const get = (selector) =>
             item.querySelector(selector)?.textContent || "";
           const getAttr = (selector, attr) =>
             item.querySelector(selector)?.getAttribute(attr) || "";
 
+          // haetaan kuvan url eri nimialueista
           const getImage = (item) => {
             const itunesNS = "http://www.itunes.com/dtds/podcast-1.0.dtd";
             const mediaNS = "http://search.yahoo.com/mrss/";
@@ -84,6 +91,7 @@ function App() {
             return "https://via.placeholder.com/300x300?text=No+Image";
           };
 
+          // palautetaan jakson tiedot objektina
           return {
             title: get("title"),
             description: get("description"),
@@ -98,6 +106,7 @@ function App() {
           };
         });
 
+        // asetetaan ladatut jaksot tilaan
         setEpisodes(parsedEpisodes);
         setError("");
       } catch (err) {
@@ -110,11 +119,13 @@ function App() {
 
     fetchFeed();
 
+    // jos komponentti poistetaan, tyhjennetään ajastin
     return () => {
       if (timerId) clearInterval(timerId);
     };
   }, []);
 
+  // seurataan vieritystä headerin pienentämistä varten
   useEffect(() => {
     const onScroll = () => {
       setScrolled(window.scrollY > 50);
@@ -123,6 +134,7 @@ function App() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // suodatetaan jaksot haun perusteella
   const filteredEpisodes = useMemo(() => {
     if (!searchTerm.trim()) return episodes;
     return episodes.filter((ep) =>
@@ -130,8 +142,10 @@ function App() {
     );
   }, [searchTerm, episodes]);
 
+  // näytetään vain osa suodatetuista jaksoista
   const visibleEpisodes = filteredEpisodes.slice(0, visibleCount);
 
+  // näytetään/piilotetaan jakson kuvaus
   const toggleDescription = (index) => {
     setExpandedEpisodes((prev) => {
       const newSet = new Set(prev);
@@ -141,7 +155,7 @@ function App() {
     });
   };
 
-  // Media Session API effect
+  // media session api päivittää toistettavan jakson tiedot
   useEffect(() => {
     if (currentPlayingIndex === null) return;
     const ep = visibleEpisodes[currentPlayingIndex];
