@@ -18,20 +18,47 @@ function App() {
   useEffect(() => {
     let timerId;
 
-    // haetaan podcast-feedi palvelimelta
+    // Rate limiting logic based on refresh count in sessionStorage
+    const refreshCount =
+      Number(sessionStorage.getItem("refreshCount") || 0) + 1;
+    sessionStorage.setItem("refreshCount", refreshCount);
+
+    if (refreshCount > 5) {
+      setError("Too many requests. Please try again later.");
+      setRetryAfter(60);
+      setLoading(false);
+
+      timerId = setInterval(() => {
+        setRetryAfter((prev) => {
+          if (prev <= 1) {
+            clearInterval(timerId);
+            setError("");
+            sessionStorage.setItem("refreshCount", "0"); // Reset after cooldown
+            setLoading(false); // Optionally, you can trigger reload or something else here
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => {
+        if (timerId) clearInterval(timerId);
+      };
+    }
+
+    // If under limit, fetch feed as usual
     const fetchFeed = async () => {
       try {
         const [response] = await Promise.all([
           fetch("/api/feed"),
-          new Promise((resolve) => setTimeout(resolve, 1500)), //skeletoncard flex while loading
+          new Promise((resolve) => setTimeout(resolve, 1500)), // skeleton card delay
         ]);
 
-        // jos pyyntöjä on liikaa, asetetaan virhe ja odotusaika
         if (response.status === 429) {
           setError("Too many requests. Please try again later.");
           setRetryAfter(60);
+          setLoading(false);
 
-          // käynnistetään sekuntikello joka laskee odotusaikaa
           timerId = setInterval(() => {
             setRetryAfter((prev) => {
               if (prev <= 1) {
@@ -46,7 +73,6 @@ function App() {
           return;
         }
 
-        // jos vastaus ei ole ok, yritetään hakea virheviesti
         if (!response.ok) {
           let message = "Failed to load podcast feed.";
           try {
@@ -56,21 +82,18 @@ function App() {
           throw new Error(message);
         }
 
-        // parsitaan xml-feed
         const text = await response.text();
         const parser = new DOMParser();
         const xml = parser.parseFromString(text, "application/xml");
 
         const items = Array.from(xml.querySelectorAll("item"));
 
-        // muunnetaan xml-jaksot json-muotoon
         const parsedEpisodes = items.map((item) => {
           const get = (selector) =>
             item.querySelector(selector)?.textContent || "";
           const getAttr = (selector, attr) =>
             item.querySelector(selector)?.getAttribute(attr) || "";
 
-          // haetaan kuvan url eri nimialueista
           const getImage = (item) => {
             const itunesNS = "http://www.itunes.com/dtds/podcast-1.0.dtd";
             const mediaNS = "http://search.yahoo.com/mrss/";
@@ -94,7 +117,6 @@ function App() {
             return "https://via.placeholder.com/300x300?text=No+Image";
           };
 
-          // palautetaan jakson tiedot objektina
           return {
             title: get("title"),
             description: get("description"),
@@ -109,7 +131,6 @@ function App() {
           };
         });
 
-        // asetetaan ladatut jaksot tilaan
         setEpisodes(parsedEpisodes);
         setError("");
       } catch (err) {
@@ -122,7 +143,6 @@ function App() {
 
     fetchFeed();
 
-    // jos komponentti poistetaan, tyhjennetään ajastin
     return () => {
       if (timerId) clearInterval(timerId);
     };
@@ -243,7 +263,7 @@ function App() {
       {retryAfter > 0 && (
         <p className="text-yellow-400 mb-4">
           Please wait {retryAfter} second{retryAfter !== 1 ? "s" : ""} before
-          retrying.
+          refreshing the site.
         </p>
       )}
 
