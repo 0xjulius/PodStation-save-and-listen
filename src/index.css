@@ -2,6 +2,7 @@
 body {
   font-family: 'Poppins', sans-serif;
   background-color: black;
+  overflow-x: hidden;
 }
 
 .title-gradient {
@@ -23,4 +24,21 @@ text-fill-color: transparent;
 
 .spin-slow {
   animation: spin-slow 6s linear infinite;
+}
+
+.break-words {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  hyphens: auto;
+  word-break: break-word;
+}
+
+.truncate-two-lines {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;  
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-word;
 }

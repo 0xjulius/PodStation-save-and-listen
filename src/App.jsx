@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SkeletonCard from "./components/SkeletonCard";
 import logo from "./assets/logo.png";
-import { Heart, HeartOff } from "lucide-react"; // Import icons
+
 
 function App() {
   const [episodes, setEpisodes] = useState([]);
@@ -19,6 +19,38 @@ function App() {
 
   const FAVORITES_KEY = "favoritePodcasts";
 
+  const Heart = (props) => (
+    <svg
+      {...props}
+      fill="currentColor"
+      viewBox="0 0 24 24"
+      stroke="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 
+        4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3
+        19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+      />
+    </svg>
+  );
+
+  const HeartOff = (props) => (
+    <svg
+      {...props}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 
+        4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3
+        19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+      />
+    </svg>
+  );
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem(FAVORITES_KEY)) || [];
     setFavorites(saved);
@@ -295,91 +327,113 @@ function App() {
         </p>
       )}
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 flex-grow">
+      <div className="flex-grow">
         <AnimatePresence>
-          {loading || filteredEpisodes.length === 0
-            ? Array.from({ length: 3 }).map((_, idx) => (
-                <SkeletonCard key={`skeleton-${idx}`} />
-              ))
-            : visibleEpisodes.map((ep, index) => (
-                <motion.div
-                  key={ep.audioUrl || index}
-                  layout
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className="bg-zinc-900 p-4 rounded-2xl shadow-lg flex flex-col"
-                >
-                  <img
-                    src={ep.image}
-                    alt={ep.title}
-                    className="rounded-xl mb-4 w-full aspect-square object-cover"
-                    loading="lazy"
-                  />
-                  <h2 className="text-xl font-semibold mb-1">{ep.title}</h2>
-                  <p className="text-sm text-zinc-400 mb-2">{ep.pubDate}</p>
-                  <div className="flex justify-between items-center mb-2">
-                    <audio
-                      controls
-                      controlsList="nodownload"
-                      src={ep.audioUrl}
-                      className="w-full"
-                      onPlay={() => setCurrentPlayingIndex(index)}
-                    />
-                    <button
-                      onClick={() => toggleFavorite(ep.title)}
-                      className="ml-2"
-                      title="Toggle Favorite"
+          {showFavoritesOnly && favorites.length === 0 && !loading ? (
+            <p className="text-center text-orange-400 mt-10 text-lg">
+              No favorites yet. Add some by clicking the heart!
+            </p>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {(loading || filteredEpisodes.length === 0) && !showFavoritesOnly
+                ? Array.from({ length: 3 }).map((_, idx) => (
+                    <SkeletonCard key={`skeleton-${idx}`} />
+                  ))
+                : visibleEpisodes.map((ep, index) => (
+                    <motion.div
+                      key={ep.audioUrl || index}
+                      layout
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.3 }}
+                      className="bg-zinc-900 p-4 rounded-2xl shadow-lg flex flex-col"
                     >
-                      {isFavorite(ep.title) ? (
-                        <Heart className="text-orange-500" />
-                      ) : (
-                        <HeartOff className="text-zinc-600" />
+                      <img
+                        src={ep.image}
+                        alt={ep.title}
+                        className="rounded-xl mb-4 w-full aspect-square object-cover"
+                        loading="lazy"
+                      />
+
+                      <div className="flex justify-between items-center mb-1">
+                        <h2 className="text-xl font-semibold mb-1">
+                          {ep.title}
+                        </h2>
+
+                        <motion.button
+                          onClick={() => toggleFavorite(ep.title)}
+                          title="Toggle Favorite"
+                          whileTap={{ scale: 0.8 }}
+                          className="ml-2"
+                        >
+                          {isFavorite(ep.title) ? (
+                            <Heart className="text-orange-500 h-7 w-7" />
+                          ) : (
+                            <HeartOff className="text-zinc-600 h-7 w-7" />
+                          )}
+                        </motion.button>
+                      </div>
+                      {ep.description && (
+                        <>
+                          <AnimatePresence>
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              exit={{ opacity: 0, height: 0 }}
+                              transition={{ duration: 0.3 }}
+                              className="overflow-hidden text-md text-zinc-400 space-y-2"
+                            >
+                              <div
+                                className={`w-full max-w-full break-words text-md text-zinc-400 ${
+                                  !expandedEpisodes.has(index)
+                                    ? "truncate-two-lines"
+                                    : ""
+                                }`}
+                                dangerouslySetInnerHTML={{
+                                  __html: ep.description,
+                                }}
+                              />
+                              <button
+                                onClick={() => toggleDescription(index)}
+                                className="text-sm text-orange-400 hover:underline self-start mb-2 focus:outline-none"
+                                aria-expanded={expandedEpisodes.has(index)}
+                              >
+                                {expandedEpisodes.has(index)
+                                  ? "Hide Description"
+                                  : "Show more"}
+                              </button>
+
+                              {expandedEpisodes.has(index) && (
+                                <p className="text-xs text-white italic max-w-screen mb-4">
+                                  Disclaimer: I do not own, control, or profit
+                                  from any referral or affiliate links that may
+                                  appear in episode descriptions. These links
+                                  are part of the original third-party podcast
+                                  feed and are displayed automatically without
+                                  modification.
+                                </p>
+                              )}
+                            </motion.div>
+                          </AnimatePresence>
+                        </>
                       )}
-                    </button>
-                  </div>
 
-                  {ep.description && (
-                    <>
-                      <button
-                        onClick={() => toggleDescription(index)}
-                        className="text-sm text-orange-400 hover:underline self-start mb-2 focus:outline-none"
-                        aria-expanded={expandedEpisodes.has(index)}
-                      >
-                        {expandedEpisodes.has(index)
-                          ? "Hide Description"
-                          : "Show Description"}
-                      </button>
+                      <p className="text-sm text-zinc-400 mb-2">{ep.pubDate}</p>
 
-                      <AnimatePresence>
-                        {expandedEpisodes.has(index) && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            exit={{ opacity: 0, height: 0 }}
-                            transition={{ duration: 0.3 }}
-                            className="overflow-hidden text-md text-zinc-400 space-y-2"
-                          >
-                            <div
-                              dangerouslySetInnerHTML={{
-                                __html: ep.description,
-                              }}
-                            />
-                            <p className="text-xs text-orange-600 italic">
-                              Disclaimer: I do not own, control, or profit from
-                              any referral or affiliate links that may appear in
-                              episode descriptions. These links are part of the
-                              original third-party podcast feed and are
-                              displayed automatically without modification.
-                            </p>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </>
-                  )}
-                </motion.div>
-              ))}
+                      <div className="flex justify-between items-center mb-2">
+                        <audio
+                          controls
+                          controlsList="nodownload"
+                          src={ep.audioUrl}
+                          className="w-full"
+                          onPlay={() => setCurrentPlayingIndex(index)}
+                        />
+                      </div>
+                    </motion.div>
+                  ))}
+            </div>
+          )}
         </AnimatePresence>
       </div>
 
