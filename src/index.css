@@ -11,3 +11,16 @@ background-image: linear-gradient(to right top, #eb965e, #c27456, #96554a, #693b
 background-clip: text;
 text-fill-color: transparent;
 }
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spin-slow {
+  animation: spin-slow 6s linear infinite;
+}

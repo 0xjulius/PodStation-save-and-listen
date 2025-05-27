@@ -23,7 +23,7 @@ function App() {
       try {
         const [response] = await Promise.all([
           fetch("/api/feed"),
-          new Promise((resolve) => setTimeout(resolve, 2000)), //skeletoncard flex while loading
+          new Promise((resolve) => setTimeout(resolve, 1500)), //skeletoncard flex while loading
         ]);
 
         // jos pyyntöjä on liikaa, asetetaan virhe ja odotusaika
@@ -216,7 +216,28 @@ function App() {
         </div>
       </header>
 
-      {loading && <p className="text-zinc-400">Loading episodes...</p>}
+      <AnimatePresence>
+        {loading && (
+          <motion.div
+            key="loading-overlay"
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="fixed inset-0 flex flex-col items-center justify-center backdrop-blur-sm bg-opacity-30 z-50"
+            aria-live="polite"
+            aria-busy="true"
+          >
+            <img
+              src={logo}
+              alt="Loading..."
+              className="w-100 h-100 spin-slow mb-4"
+              aria-label="Loading animation"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {error && <p className="text-red-500">{error}</p>}
 
       {retryAfter > 0 && (
