@@ -2,23 +2,43 @@ import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SkeletonCard from "./components/SkeletonCard";
 import logo from "./assets/logo.png";
+import { Heart, HeartOff } from "lucide-react"; // Import icons
 
 function App() {
-  // alustetaan useState-hookeilla kaikki tarvittavat tilamuuttujat
-  const [episodes, setEpisodes] = useState([]); // kaikki jaksot
-  const [visibleCount, setVisibleCount] = useState(9); // näkyvien jaksojen määrä
-  const [loading, setLoading] = useState(true); // lataustila
-  const [error, setError] = useState(""); // mahdollinen virheteksti
-  const [searchTerm, setSearchTerm] = useState(""); // hakukentän arvo
-  const [expandedEpisodes, setExpandedEpisodes] = useState(new Set()); // mitkä jaksot ovat auki
-  const [scrolled, setScrolled] = useState(false); // onko sivua vieritetty
-  const [retryAfter, setRetryAfter] = useState(0); // odotusaika jos tulee liikaa pyyntöjä
-  const [currentPlayingIndex, setCurrentPlayingIndex] = useState(null); // mikä jakso on käynnissä
+  const [episodes, setEpisodes] = useState([]);
+  const [favorites, setFavorites] = useState([]);
+  const [visibleCount, setVisibleCount] = useState(9);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [expandedEpisodes, setExpandedEpisodes] = useState(new Set());
+  const [scrolled, setScrolled] = useState(false);
+  const [retryAfter, setRetryAfter] = useState(0);
+  const [currentPlayingIndex, setCurrentPlayingIndex] = useState(null);
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+
+  const FAVORITES_KEY = "favoritePodcasts";
+
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem(FAVORITES_KEY)) || [];
+    setFavorites(saved);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+  }, [favorites]);
+
+  const toggleFavorite = (title) => {
+    setFavorites((prev) =>
+      prev.includes(title) ? prev.filter((t) => t !== title) : [...prev, title]
+    );
+  };
+
+  const isFavorite = (title) => favorites.includes(title);
 
   useEffect(() => {
     let timerId;
 
-    // Rate limiting logic based on refresh count in sessionStorage
     const refreshCount =
       Number(sessionStorage.getItem("refreshCount") || 0) + 1;
     sessionStorage.setItem("refreshCount", refreshCount);
@@ -33,8 +53,8 @@ function App() {
           if (prev <= 1) {
             clearInterval(timerId);
             setError("");
-            sessionStorage.setItem("refreshCount", "0"); // Reset after cooldown
-            setLoading(false); // Optionally, you can trigger reload or something else here
+            sessionStorage.setItem("refreshCount", "0");
+            setLoading(false);
             return 0;
           }
           return prev - 1;
@@ -46,12 +66,11 @@ function App() {
       };
     }
 
-    // If under limit, fetch feed as usual
     const fetchFeed = async () => {
       try {
         const [response] = await Promise.all([
           fetch("/api/feed"),
-          new Promise((resolve) => setTimeout(resolve, 1500)), // skeleton card delay
+          new Promise((resolve) => setTimeout(resolve, 1500)),
         ]);
 
         if (response.status === 429) {
@@ -148,7 +167,6 @@ function App() {
     };
   }, []);
 
-  // seurataan vieritystä headerin pienentämistä varten
   useEffect(() => {
     const onScroll = () => {
       setScrolled(window.scrollY > 50);
@@ -157,18 +175,17 @@ function App() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // suodatetaan jaksot haun perusteella
   const filteredEpisodes = useMemo(() => {
-    if (!searchTerm.trim()) return episodes;
-    return episodes.filter((ep) =>
+    const base = episodes.filter((ep) =>
       ep.title.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [searchTerm, episodes]);
+    return showFavoritesOnly
+      ? base.filter((ep) => favorites.includes(ep.title))
+      : base;
+  }, [searchTerm, episodes, favorites, showFavoritesOnly]);
 
-  // näytetään vain osa suodatetuista jaksoista
   const visibleEpisodes = filteredEpisodes.slice(0, visibleCount);
 
-  // näytetään/piilotetaan jakson kuvaus
   const toggleDescription = (index) => {
     setExpandedEpisodes((prev) => {
       const newSet = new Set(prev);
@@ -178,7 +195,6 @@ function App() {
     });
   };
 
-  // media session api päivittää toistettavan jakson tiedot
   useEffect(() => {
     if (currentPlayingIndex === null) return;
     const ep = visibleEpisodes[currentPlayingIndex];
@@ -225,14 +241,26 @@ function App() {
             </h1>
           </div>
 
-          <input
-            type="search"
-            placeholder="Search episodes..."
-            className="px-4 py-2 rounded-2xl bg-zinc-900 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 transition w-full sm:w-64"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            aria-label="Search episodes"
-          />
+          <div className="flex gap-2 items-center">
+            <button
+              onClick={() => setShowFavoritesOnly((prev) => !prev)}
+              className={`px-4 py-2 rounded-2xl bg-orange-500 text-sm font-semibold transition h-10 ${
+                showFavoritesOnly
+                  ? "bg-orange-600 text-white cursor-pointer hover:bg-zinc-700 "
+                  : "bg-orange-500 text-gray-300 hover:bg-zinc-700 cursor-pointer"
+              }`}
+            >
+              {showFavoritesOnly ? "All" : "Favorites"}
+            </button>
+            <input
+              type="search"
+              placeholder="Search episodes..."
+              className="px-4 py-2 rounded-2xl bg-zinc-900 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 transition w-full sm:w-64"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              aria-label="Search episodes"
+            />
+          </div>
         </div>
       </header>
 
@@ -291,13 +319,27 @@ function App() {
                   />
                   <h2 className="text-xl font-semibold mb-1">{ep.title}</h2>
                   <p className="text-sm text-zinc-400 mb-2">{ep.pubDate}</p>
-                  <audio
-                    controls
-                    controlsList="nodownload"
-                    src={ep.audioUrl}
-                    className="w-full mb-2"
-                    onPlay={() => setCurrentPlayingIndex(index)}
-                  />
+                  <div className="flex justify-between items-center mb-2">
+                    <audio
+                      controls
+                      controlsList="nodownload"
+                      src={ep.audioUrl}
+                      className="w-full"
+                      onPlay={() => setCurrentPlayingIndex(index)}
+                    />
+                    <button
+                      onClick={() => toggleFavorite(ep.title)}
+                      className="ml-2"
+                      title="Toggle Favorite"
+                    >
+                      {isFavorite(ep.title) ? (
+                        <Heart className="text-orange-500" />
+                      ) : (
+                        <HeartOff className="text-zinc-600" />
+                      )}
+                    </button>
+                  </div>
+
                   {ep.description && (
                     <>
                       <button
@@ -352,7 +394,6 @@ function App() {
           </button>
         </div>
       )}
-
       <footer className="mt-12 py-6 border-t border-gray-700 text-center text-zinc-400 text-sm select-none">
         <p className="mt-2">
           <a
