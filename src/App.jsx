@@ -276,13 +276,17 @@ function App() {
           <div className="flex gap-2 items-center">
             <button
               onClick={() => setShowFavoritesOnly((prev) => !prev)}
-              className={`px-4 py-2 rounded-2xl bg-orange-500 text-sm font-semibold transition h-10 ${
+              className={`px-4 rounded-2xl bg-orange-500 text-sm font-semibold transition h-10 ${
                 showFavoritesOnly
-                  ? "bg-orange-600 text-white cursor-pointer hover:bg-zinc-700 "
-                  : "bg-orange-500 text-gray-300 hover:bg-zinc-700 cursor-pointer"
+                  ? "bg-orange-600  hover:bg-zinc-700 cursor-pointer"
+                  : "bg-zinc-900 text-red-400 cursor-pointer hover:bg-zinc-700"
               }`}
             >
-              {showFavoritesOnly ? "All" : "Favorites"}
+              {showFavoritesOnly ? (
+                <Heart className="h-7 w-7" />
+              ) : (
+                <HeartOff className="h-7 w-7" />
+              )}
             </button>
             <input
               type="search"
