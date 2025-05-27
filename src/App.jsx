@@ -250,7 +250,7 @@ function App() {
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 flex-grow">
         <AnimatePresence>
           {loading || filteredEpisodes.length === 0
-            ? Array.from({ length: 9 }).map((_, idx) => (
+            ? Array.from({ length: 3 }).map((_, idx) => (
                 <SkeletonCard key={`skeleton-${idx}`} />
               ))
             : visibleEpisodes.map((ep, index) => (
