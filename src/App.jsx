@@ -21,7 +21,10 @@ function App() {
     // haetaan podcast-feedi palvelimelta
     const fetchFeed = async () => {
       try {
-        const response = await fetch("/api/feed");
+        const [response] = await Promise.all([
+          fetch("/api/feed"),
+          new Promise((resolve) => setTimeout(resolve, 2000)), //skeletoncard flex while loading
+        ]);
 
         // jos pyyntöjä on liikaa, asetetaan virhe ja odotusaika
         if (response.status === 429) {
