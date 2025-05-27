@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import SkeletonCard from "./components/SkeletonCard";
 import logo from "./assets/logo.png";
-
 
 function App() {
   // alustetaan useState-hookeilla kaikki tarvittavat tilamuuttujat
@@ -223,78 +223,77 @@ function App() {
         </p>
       )}
 
-      {!loading && filteredEpisodes.length === 0 && (
-        <p className="text-zinc-400">No episodes found for your search.</p>
-      )}
-
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 flex-grow">
         <AnimatePresence>
-          {visibleEpisodes.map((ep, index) => (
-            <motion.div
-              key={ep.audioUrl || index}
-              layout
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className="bg-zinc-900 p-4 rounded-2xl shadow-lg flex flex-col"
-            >
-              <img
-                src={ep.image}
-                alt={ep.title}
-                className="rounded-xl mb-4 w-full aspect-square object-cover"
-                loading="lazy"
-              />
-              <h2 className="text-xl font-semibold mb-1">{ep.title}</h2>
-              <p className="text-sm text-zinc-400 mb-2">{ep.pubDate}</p>
-              <audio
-                controls
-                controlsList="nodownload"
-                src={ep.audioUrl}
-                className="w-full mb-2"
-                onPlay={() => setCurrentPlayingIndex(index)}
-              />
-
-              <p className="text-xs text-zinc-500 mb-2"></p>
-
-              {ep.description && (
-                <>
-                  <button
-                    onClick={() => toggleDescription(index)}
-                    className="text-sm text-orange-400 hover:underline self-start mb-2 focus:outline-none"
-                    aria-expanded={expandedEpisodes.has(index)}
-                  >
-                    {expandedEpisodes.has(index)
-                      ? "Hide Description"
-                      : "Show Description"}
-                  </button>
-
-                  <AnimatePresence>
-                    {expandedEpisodes.has(index) && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="overflow-hidden text-md text-zinc-400 space-y-2"
+          {loading || filteredEpisodes.length === 0
+            ? Array.from({ length: 9 }).map((_, idx) => (
+                <SkeletonCard key={`skeleton-${idx}`} />
+              ))
+            : visibleEpisodes.map((ep, index) => (
+                <motion.div
+                  key={ep.audioUrl || index}
+                  layout
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="bg-zinc-900 p-4 rounded-2xl shadow-lg flex flex-col"
+                >
+                  <img
+                    src={ep.image}
+                    alt={ep.title}
+                    className="rounded-xl mb-4 w-full aspect-square object-cover"
+                    loading="lazy"
+                  />
+                  <h2 className="text-xl font-semibold mb-1">{ep.title}</h2>
+                  <p className="text-sm text-zinc-400 mb-2">{ep.pubDate}</p>
+                  <audio
+                    controls
+                    controlsList="nodownload"
+                    src={ep.audioUrl}
+                    className="w-full mb-2"
+                    onPlay={() => setCurrentPlayingIndex(index)}
+                  />
+                  {ep.description && (
+                    <>
+                      <button
+                        onClick={() => toggleDescription(index)}
+                        className="text-sm text-orange-400 hover:underline self-start mb-2 focus:outline-none"
+                        aria-expanded={expandedEpisodes.has(index)}
                       >
-                        <div
-                          dangerouslySetInnerHTML={{ __html: ep.description }}
-                        />
-                        <p className="text-xs text-orange-600 italic">
-                          Disclaimer: I do not own, control, or profit from any
-                          referral or affiliate links that may appear in episode
-                          descriptions. These links are part of the original
-                          third-party podcast feed and are displayed
-                          automatically without modification.
-                        </p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </>
-              )}
-            </motion.div>
-          ))}
+                        {expandedEpisodes.has(index)
+                          ? "Hide Description"
+                          : "Show Description"}
+                      </button>
+
+                      <AnimatePresence>
+                        {expandedEpisodes.has(index) && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="overflow-hidden text-md text-zinc-400 space-y-2"
+                          >
+                            <div
+                              dangerouslySetInnerHTML={{
+                                __html: ep.description,
+                              }}
+                            />
+                            <p className="text-xs text-orange-600 italic">
+                              Disclaimer: I do not own, control, or profit from
+                              any referral or affiliate links that may appear in
+                              episode descriptions. These links are part of the
+                              original third-party podcast feed and are
+                              displayed automatically without modification.
+                            </p>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </>
+                  )}
+                </motion.div>
+              ))}
         </AnimatePresence>
       </div>
 
