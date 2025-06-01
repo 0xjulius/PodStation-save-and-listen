@@ -68,6 +68,35 @@ function App() {
 
   const isFavorite = (title) => favorites.includes(title);
 
+  const [listened, setListened] = useState(() => {
+    return JSON.parse(localStorage.getItem("listenedEpisodes") || "[]");
+  });
+
+  useEffect(() => {
+    localStorage.setItem("listenedEpisodes", JSON.stringify(listened));
+  }, [listened]);
+
+  const toggleListened = (title) => {
+    setListened((prev) =>
+      prev.includes(title) ? prev.filter((t) => t !== title) : [...prev, title]
+    );
+  };
+
+  const isListened = (title) => listened.includes(title);
+
+  const CheckIcon = (props) => (
+    <svg
+      {...props}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M5 13l4 4L19 7" />
+    </svg>
+  );
+
   useEffect(() => {
     let timerId;
 
@@ -351,7 +380,11 @@ function App() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -20 }}
                       transition={{ duration: 0.3 }}
-                      className="bg-zinc-900 p-4 rounded-2xl shadow-lg flex flex-col"
+                      className={`bg-zinc-900 p-4 rounded-2xl shadow-lg flex flex-col transition-all duration-300 ${
+                        isListened(ep.title)
+                          ? "opacity-50 grayscale brightness-50"
+                          : ""
+                      }`}
                     >
                       <img
                         src={ep.image}
@@ -365,19 +398,35 @@ function App() {
                           {ep.title}
                         </h2>
 
-                        <motion.button
-                          onClick={() => toggleFavorite(ep.title)}
-                          title="Toggle Favorite"
-                          whileTap={{ scale: 0.8 }}
-                          className="ml-2"
-                        >
-                          {isFavorite(ep.title) ? (
-                            <Heart className="text-orange-500 h-7 w-7" />
-                          ) : (
-                            <HeartOff className="text-zinc-600 h-7 w-7" />
-                          )}
-                        </motion.button>
+                        <div className="flex items-center gap-3">
+                          <motion.button
+                            onClick={() => toggleListened(ep.title)}
+                            title="Mark as Listened"
+                            whileTap={{ scale: 0.9 }}
+                          >
+                            <CheckIcon
+                              className={`h-9 w-9 ${
+                                isListened(ep.title)
+                                  ? "text-green-400"
+                                  : "text-zinc-600"
+                              }`}
+                            />
+                          </motion.button>
+
+                          <motion.button
+                            onClick={() => toggleFavorite(ep.title)}
+                            title="Toggle Favorite"
+                            whileTap={{ scale: 0.9 }}
+                          >
+                            {isFavorite(ep.title) ? (
+                              <Heart className="text-orange-500 h-7 w-7" />
+                            ) : (
+                              <HeartOff className="text-zinc-600 h-7 w-7" />
+                            )}
+                          </motion.button>
+                        </div>
                       </div>
+
                       {ep.description && (
                         <>
                           <AnimatePresence>
