@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import SkeletonCard from "./components/SkeletonCard";
 import logo from "./assets/logo.png";
 
-
 function App() {
   const [episodes, setEpisodes] = useState([]);
   const [favorites, setFavorites] = useState([]);
@@ -407,8 +406,8 @@ function App() {
                             <CheckIcon
                               className={`h-9 w-9 ${
                                 isListened(ep.title)
-                                  ? "text-green-400 cursor-pointer"
-                                  : "text-zinc-600 cursor-pointer"
+                                  ? "text-green-400 cursor-pointer transition duration-300 ease-in-out"
+                                  : "text-zinc-600 cursor-pointer hover:text-green-400 transition duration-300 ease-in-out"
                               }`}
                             />
                           </motion.button>
@@ -419,9 +418,9 @@ function App() {
                             whileTap={{ scale: 0.9 }}
                           >
                             {isFavorite(ep.title) ? (
-                              <Heart className="text-orange-500 h-7 w-7 cursor-pointer" />
+                              <Heart className="text-orange-500 h-7 w-7 cursor-pointer transition duration-300 ease-in-out" />
                             ) : (
-                              <HeartOff className="text-zinc-600 h-7 w-7 cursor-pointer" />
+                              <HeartOff className="text-zinc-600 h-7 w-7 cursor-pointer hover:text-red-400 transition duration-300 ease-in-out" />
                             )}
                           </motion.button>
                         </div>
