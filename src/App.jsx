@@ -380,9 +380,9 @@ function App() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -20 }}
                       transition={{ duration: 0.3 }}
-                      className={`bg-zinc-900 p-4 rounded-2xl shadow-lg flex flex-col transition-all duration-300 ${
+                      className={`bg-zinc-900 p-4 rounded-2xl shadow-lg flex flex-col transition-all duration-300  ${
                         isListened(ep.title)
-                          ? "opacity-50 grayscale brightness-50"
+                          ? "opacity-50 grayscale brightness-50 "
                           : ""
                       }`}
                     >
@@ -407,8 +407,8 @@ function App() {
                             <CheckIcon
                               className={`h-9 w-9 ${
                                 isListened(ep.title)
-                                  ? "text-green-400"
-                                  : "text-zinc-600"
+                                  ? "text-green-400 cursor-pointer"
+                                  : "text-zinc-600 cursor-pointer"
                               }`}
                             />
                           </motion.button>
@@ -419,9 +419,9 @@ function App() {
                             whileTap={{ scale: 0.9 }}
                           >
                             {isFavorite(ep.title) ? (
-                              <Heart className="text-orange-500 h-7 w-7" />
+                              <Heart className="text-orange-500 h-7 w-7 cursor-pointer" />
                             ) : (
-                              <HeartOff className="text-zinc-600 h-7 w-7" />
+                              <HeartOff className="text-zinc-600 h-7 w-7 cursor-pointer" />
                             )}
                           </motion.button>
                         </div>
@@ -449,7 +449,7 @@ function App() {
                               />
                               <button
                                 onClick={() => toggleDescription(index)}
-                                className="text-sm text-orange-400 hover:underline self-start mb-2 focus:outline-none"
+                                className="text-sm text-orange-400 hover:underline self-start mb-2 focus:outline-none cursor-pointer"
                                 aria-expanded={expandedEpisodes.has(index)}
                               >
                                 {expandedEpisodes.has(index)
