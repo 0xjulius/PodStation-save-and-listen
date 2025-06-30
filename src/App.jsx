@@ -10,6 +10,8 @@ import logo2 from "./assets/logo.png";
 import Footer from "./components/footer";
 import VantaWr from "./components/VantaWrapper";
 import Hero from "./components/hero";
+import TheVergeCastFeed from "./pages/thevergecast";
+import TheDoctorsFarmacy from "./pages/thedoctorsfarmacy";
 
 function Home() {
   return (
@@ -32,17 +34,17 @@ function Home() {
               />
             </Link>
 
-            <Link to="#">
+            <Link to="/thevergecast">
               <Card
-                title="Upcoming.."
-                logo="https://avatar.iran.liara.run/public"
+                title="The Vergecast"
+                logo="https://megaphone.imgix.net/podcasts/e4c412e6-e1f0-11e8-9bde-83f9d376f059/image/Podcast_Tile_6000x6000px.png?ixlib=rails-4.3.1&max-w=3000&max-h=3000&fit=crop&auto=format,compress"
               />
             </Link>
 
-            <Link to="#">
+            <Link to="/thedoctorsfarmacy">
               <Card
-                title="Upcoming.."
-                logo="https://avatar.iran.liara.run/public"
+                title="The Doctor's Farmacy"
+                logo="https://megaphone.imgix.net/podcasts/023e032e-c763-11ee-be4f-27c14bd0edec/image/b48241079d9f8d935c35e92fa507926f.jpg?ixlib=rails-4.3.1&max-w=3000&max-h=3000&fit=crop&auto=format,compress"
               />
             </Link>
 
@@ -63,14 +65,17 @@ function Home() {
 
 export default function App() {
   return (
-      <Router>
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/huberman" element={<HubermanFeed />} />
-          <Route path="/joe-rogan-experience" element={<JreFeed />} />
-          <Route path="/this-past-weekend" element={<Thispastweekend />} />
-        </Routes>
-      </Router>
+    <Router>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/huberman" element={<HubermanFeed />} />
+        <Route path="/joe-rogan-experience" element={<JreFeed />} />
+        <Route path="/this-past-weekend" element={<Thispastweekend />} />
+        <Route path="/thevergecast" element={<TheVergeCastFeed />} />
+        <Route path="/thedoctorsfarmacy" element={<TheDoctorsFarmacy />} />
+        {/* Add more routes as needed */}
+      </Routes>
+    </Router>
   );
 }

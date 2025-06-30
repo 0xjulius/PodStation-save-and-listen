@@ -3,10 +3,9 @@ import React from "react";
 export default function Footer() {
   return (
     <footer className="card blur-bg rounded-2xl py-6 text-center text-zinc-400 text-sm select-none bg-black border border-white/10 mt-6 ">
-
       <p className="mt-2">
         <a
-          href="https://juliusaalto.com"
+          href="https://juliusaalto.com/"
           target="_blank"
           rel="noreferrer"
           className="mx-2 hover:text-orange-400 text-white "
@@ -34,7 +33,8 @@ export default function Footer() {
         of their respective owners and shown here for educational,
         non-commercial purposes only.
       </p>
-      <p>
+
+      <div>
         <br />
         <p className="mb-8 text-xs text-orange-400 px-4">
           <strong className="text-zinc-400 ">Disclaimer:</strong> I do not own,
@@ -52,7 +52,7 @@ export default function Footer() {
         >
           Megaphone
         </a>
-      </p>
+      </div>
     </footer>
   );
 }

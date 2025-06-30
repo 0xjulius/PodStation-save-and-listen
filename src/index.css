@@ -30,6 +30,9 @@ text-fill-color: transparent;
   }
 }
 
+.bg-verge {
+  background-color: #3CFFD0
+}
 .spin-slow {
   animation: spin-slow 6s linear infinite;
 }
