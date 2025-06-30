@@ -264,7 +264,7 @@ function JreFeed() {
     if ("mediaSession" in navigator) {
       navigator.mediaSession.metadata = new window.MediaMetadata({
         title: ep.title,
-        artist: "Joe Rogan Experience",
+        artist: "This Past Weekend",
         album: `Episode ${currentPlayingIndex + 1}`,
         artwork: [{ src: ep.image, sizes: "512x512", type: "image/png" }],
       });

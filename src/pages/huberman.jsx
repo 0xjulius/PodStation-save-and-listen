@@ -267,7 +267,7 @@ function HubermanFeed() {
     if ("mediaSession" in navigator) {
       navigator.mediaSession.metadata = new window.MediaMetadata({
         title: ep.title,
-        artist: "Joe Rogan Experience",
+        artist: "Huberman Lab",
         album: `Episode ${currentPlayingIndex + 1}`,
         artwork: [{ src: ep.image, sizes: "512x512", type: "image/png" }],
       });
