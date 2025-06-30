@@ -130,7 +130,7 @@ function TheDoctorsFarmacy() {
     const fetchFeed = async () => {
       try {
         const [response] = await Promise.all([
-          fetch("api/thedoctorsfarmacy-feed"),
+          fetch("api/thedoctors-feed"),
           new Promise((resolve) => setTimeout(resolve, 1500)),
         ]);
 

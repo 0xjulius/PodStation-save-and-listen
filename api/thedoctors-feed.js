@@ -3,7 +3,7 @@
 let requests = {};
 
 export default async function handler(req, res) {
-  const FEED_URL = "https://feeds.megaphone.fm/thispastweekend";
+  const FEED_URL = "https://feeds.megaphone.fm/thedoctorsfarmacy";
   const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
   const now = Date.now();
 
