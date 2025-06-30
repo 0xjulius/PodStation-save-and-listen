@@ -1,7 +1,7 @@
-# WEBSITE LIVE: [JRE-POD-BROWSER](https://jre-0xjulius.vercel.app/)
+# WEBSITE LIVE: [PODSTATION-BROWSER](https://podstation-0xjulius.vercel.app/)
 
-# 🎙️ Joe Rogan Experience Podcast Browser (Unofficial)
-A fully serverless, responsive web app built with React, Tailwind CSS, and Vite that lets users search, stream, and explore episodes from the official Joe Rogan Experience RSS feed.
+# 🎙️ Podcast Browser (Unofficial)
+A fully serverless, responsive web app built with React, Tailwind CSS, and Vite that lets users search, stream, and explore episodes from the multiple RSS feeds.
 
 This project uses a serverless function (API route) to proxy and parse XML podcast data, avoiding CORS issues without needing a dedicated backend. All episode data is fetched on-demand at runtime
 
