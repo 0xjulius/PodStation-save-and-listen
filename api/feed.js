@@ -8,8 +8,8 @@ export default async function handler(req, res) {
   const now = Date.now();
 
   // Clear old entries every request (TTL: 60s)
-  const windowMs = 60 * 1000;
-  const limit = 5;
+  const windowMs = 20 * 1000;
+  const limit = 10;
 
   // Clean up expired IPs
   Object.keys(requests).forEach((ipKey) => {

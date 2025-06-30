@@ -54,6 +54,5 @@ text-fill-color: transparent;
 }
 
 .card {
-  background-color: rgba(0, 0, 0, 0.5);   
-  box-shadow: inset 0 4 30px rgba(255, 255, 255, .5);
+  background-color: rgba(0, 0, 0, 0.7);   
 }
