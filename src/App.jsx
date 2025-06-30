@@ -9,15 +9,14 @@ import logo1 from "./assets/default.webp";
 import logo2 from "./assets/logo.png";
 import Footer from "./components/footer";
 import VantaWr from "./components/VantaWrapper";
+import Hero from "./components/hero";
 
 function Home() {
   return (
     <VantaWr>
-      <div className="p-8">
-        <h1 className="text-2xl font-bold mb-6 text-center text-white">
-          Choose a Podcast Feed
-        </h1>
-        <div className="items-center justify-center flex mb-6 ">
+      <div className="p-8 ">
+        <Hero />
+        <div className="items-center justify-center flex mb-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12 bg-black blur-bg card rounded-2xl border border-white/10 ">
             <Link to="/huberman">
               <Card title="Huberman Lab" logo={logo1} />

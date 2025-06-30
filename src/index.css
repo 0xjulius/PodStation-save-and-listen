@@ -13,6 +13,14 @@ background-clip: text;
 text-fill-color: transparent;
 }
 
+.text-gradient {
+  background: #1D2A47; background: linear-gradient(135deg, #1D2A47, #33BCCF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+}
+
 @keyframes spin-slow {
   from {
     transform: rotate(0deg);
