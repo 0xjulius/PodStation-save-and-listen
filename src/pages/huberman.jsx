@@ -107,9 +107,9 @@ function HubermanFeed() {
       Number(sessionStorage.getItem("refreshCount") || 0) + 1;
     sessionStorage.setItem("refreshCount", refreshCount);
 
-    if (refreshCount > 5) {
+    if (refreshCount > 10) {
       setError("Too many requests. Please try again later.");
-      setRetryAfter(60);
+      setRetryAfter(20);
       setLoading(false);
 
       timerId = setInterval(() => {
