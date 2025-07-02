@@ -12,6 +12,7 @@ import VantaWr from "./components/VantaWrapper";
 import Hero from "./components/hero";
 import TheVergeCastFeed from "./pages/thevergecast";
 import TheDoctorsFarmacy from "./pages/thedoctorsfarmacy";
+import FacejamPage from "./pages/facejam";
 
 function Home() {
   return (
@@ -19,7 +20,7 @@ function Home() {
       <div className="p-8 ">
         <Hero />
         <div className="items-center justify-center flex mb-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12 bg-black blur-bg card rounded-2xl border border-white/10 ">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12 bg-black blur-bg card rounded-2xl border border-white/10 py-8 px-6">
             <Link to="/huberman">
               <Card title="Huberman Lab" logo={logo1} />
             </Link>
@@ -27,9 +28,9 @@ function Home() {
               <Card title="Joe Rogan Experience" logo={logo2} />
             </Link>
 
-            <Link to="/this-past-weekend">
+            <Link to="#">
               <Card
-                title="This Past Weekend"
+                title="Coming soon.."
                 logo="https://megaphone.imgix.net/podcasts/77b32ce4-b2db-11ed-9447-83efd7382a7a/image/image.jpg?ixlib=rails-4.3.1&max-w=3000&max-h=3000&fit=crop&auto=format,compress"
               />
             </Link>
@@ -48,10 +49,10 @@ function Home() {
               />
             </Link>
 
-            <Link to="#">
+            <Link to="/facejam">
               <Card
-                title="Upcoming.."
-                logo="https://avatar.iran.liara.run/public"
+                title="Facejam"
+                logo="https://megaphone.imgix.net/podcasts/2a6bf1a0-ff47-11e9-8af3-3308bdce0712/image/588bebfe6cbf0e245465fe90b81ad5df.jpg?ixlib=rails-4.3.1&max-w=3000&max-h=3000&fit=crop&auto=format,compress"
               />
             </Link>
             {/* Add more cards if needed */}
@@ -74,6 +75,7 @@ export default function App() {
         <Route path="/this-past-weekend" element={<Thispastweekend />} />
         <Route path="/thevergecast" element={<TheVergeCastFeed />} />
         <Route path="/thedoctorsfarmacy" element={<TheDoctorsFarmacy />} />
+        <Route path="/facejam" element={<FacejamPage />} />
         {/* Add more routes as needed */}
       </Routes>
     </Router>

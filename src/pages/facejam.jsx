@@ -1,10 +1,10 @@
 import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SkeletonCard from "../components/SkeletonCard";
-import logo from "../assets/logo.png";
 import Footer from "../components/footer";
+import HeaderInfo from "../components/header";
 
-function JreFeed() {
+function FacejamPage() {
   const [episodes, setEpisodes] = useState([]);
   const [favorites, setFavorites] = useState([]);
   const [visibleCount, setVisibleCount] = useState(9);
@@ -106,7 +106,7 @@ function JreFeed() {
 
     if (refreshCount > 10) {
       setError("Too many requests. Please try again later.");
-      setRetryAfter(20);
+      setRetryAfter(60);
       setLoading(false);
 
       timerId = setInterval(() => {
@@ -130,13 +130,13 @@ function JreFeed() {
     const fetchFeed = async () => {
       try {
         const [response] = await Promise.all([
-          fetch("api/thispastweekend-feed"),
+          fetch("/api/facejam"),
           new Promise((resolve) => setTimeout(resolve, 1500)),
         ]);
 
         if (response.status === 429) {
           setError("Too many requests. Please try again later.");
-          setRetryAfter(60);
+          setRetryAfter(20);
           setLoading(false);
 
           timerId = setInterval(() => {
@@ -230,7 +230,7 @@ function JreFeed() {
 
   useEffect(() => {
     const onScroll = () => {
-      setScrolled(window.scrollY > 1);
+      setScrolled(window.scrollY > 0);
     };
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
@@ -264,7 +264,7 @@ function JreFeed() {
     if ("mediaSession" in navigator) {
       navigator.mediaSession.metadata = new window.MediaMetadata({
         title: ep.title,
-        artist: "This Past Weekend",
+        artist: "Facejam Podcast",
         album: `Episode ${currentPlayingIndex + 1}`,
         artwork: [{ src: ep.image, sizes: "512x512", type: "image/png" }],
       });
@@ -288,7 +288,7 @@ function JreFeed() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center">
             <motion.img
-              src="https://megaphone.imgix.net/podcasts/77b32ce4-b2db-11ed-9447-83efd7382a7a/image/image.jpg?ixlib=rails-4.3.1&max-w=3000&max-h=3000&fit=crop&auto=format,compress"
+              src="https://megaphone.imgix.net/podcasts/2a6bf1a0-ff47-11e9-8af3-3308bdce0712/image/588bebfe6cbf0e245465fe90b81ad5df.jpg?ixlib=rails-4.3.1&max-w=3000&max-h=3000&fit=crop&auto=format,compress"
               alt="Logo"
               className="rounded mr-4"
               animate={{
@@ -298,7 +298,7 @@ function JreFeed() {
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
             />
             <h1 className="text-xl font-bold select-none lg:text-3xl title-gradient">
-              This Past Weekend w/ Theo Von.
+              Facejam
             </h1>
           </div>
 
@@ -342,9 +342,9 @@ function JreFeed() {
             aria-busy="true"
           >
             <img
-              src="https://megaphone.imgix.net/podcasts/77b32ce4-b2db-11ed-9447-83efd7382a7a/image/image.jpg?ixlib=rails-4.3.1&max-w=3000&max-h=3000&fit=crop&auto=format,compress"
+              src="https://megaphone.imgix.net/podcasts/2a6bf1a0-ff47-11e9-8af3-3308bdce0712/image/588bebfe6cbf0e245465fe90b81ad5df.jpg?ixlib=rails-4.3.1&max-w=300&max-h=300&fit=crop&auto=format,compress"
               alt="Loading..."
-              className="w-75 h-75 mb-4"
+              className="w-100 h-100 mb-4"
               aria-label="Loading animation"
             />
           </motion.div>
@@ -359,6 +359,12 @@ function JreFeed() {
           refreshing the site.
         </p>
       )}
+
+      <HeaderInfo
+        className="mb-6"
+        title="Welcome to Facejam"
+        subtitle="Join Michael Jones and Jordan Cwierz as they taste-test the latest fast food offerings, sharing their hilarious takes and culinary critiques. From bizarre new menu items to classic favorites, Facejam is your go-to podcast for all things fast food."
+      />
 
       <div className="flex-grow">
         <AnimatePresence>
@@ -385,12 +391,21 @@ function JreFeed() {
                           ? "opacity-50 grayscale brightness-50 "
                           : ""
                       }`}
-                    >
+                  >
+                    
                       <img
-                        src={ep.image}
+                        src={
+                          ep.image ||
+                          "https://megaphone.imgix.net/podcasts/2a6bf1a0-ff47-11e9-8af3-3308bdce0712/image/588bebfe6cbf0e245465fe90b81ad5df.jpg?ixlib=rails-4.3.1&max-w=3000&max-h=3000&fit=crop&auto=format,compress"
+                        }
                         alt={ep.title}
                         className="rounded-xl mb-4 w-full aspect-square object-cover"
                         loading="lazy"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null; // Prevent infinite loop if fallback also fails
+                          e.currentTarget.src =
+                            "https://megaphone.imgix.net/podcasts/2a6bf1a0-ff47-11e9-8af3-3308bdce0712/image/588bebfe6cbf0e245465fe90b81ad5df.jpg?ixlib=rails-4.3.1&max-w=3000&max-h=3000&fit=crop&auto=format,compress";
+                        }}
                       />
 
                       <div className="flex justify-between items-center mb-1">
@@ -506,4 +521,4 @@ function JreFeed() {
   );
 }
 
-export default JreFeed;
+export default FacejamPage;
